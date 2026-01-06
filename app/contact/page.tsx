@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MapPinIcon, PhoneIcon, EnvelopeIcon } from '@/components/IconComponents';
 
@@ -10,7 +10,8 @@ declare global {
   }
 }
 
-export default function ContactPage() {
+// Create a separate component for the form that uses useSearchParams
+function ContactForm() {
     const searchParams = useSearchParams();
     const [productInquiry, setProductInquiry] = useState('');
     const [formSubmitted, setFormSubmitted] = useState(false);
@@ -88,7 +89,7 @@ export default function ContactPage() {
                                 <dt className="flex-shrink-0">
                                     <MapPinIcon className="h-6 w-6 text-brand-accent" />
                                 </dt>
-                                <dd>Toronto, ON, Canada &<br/> New York, NY, USA</dd>
+                                <dd>Unit A4 - 9131 Keele Street<br/>Concord, ON, L4K 0G7, Canada</dd>
                             </div>
                             <div className="flex gap-4 items-center">
                                 <dt className="flex-shrink-0">
@@ -100,7 +101,7 @@ export default function ContactPage() {
                                 <dt className="flex-shrink-0">
                                     <EnvelopeIcon className="h-6 w-6 text-brand-accent" />
                                 </dt>
-                                <dd><a href="mailto:info@etencorporation.com" className="hover:text-brand-primary">info@etencorporation.com</a></dd>
+                                <dd><a href="mailto:info@etencorp.com" className="hover:text-brand-primary">info@etencorp.com</a></dd>
                             </div>
                         </dl>
                     </div>
@@ -159,4 +160,13 @@ export default function ContactPage() {
             </div>
         </div>
     );
+}
+
+// Main page component with Suspense wrapper
+export default function ContactPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ContactForm />
+    </Suspense>
+  );
 }
