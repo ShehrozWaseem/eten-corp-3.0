@@ -1,11 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Logo from './Logo';
 import { EnvelopeIcon, MapPinIcon } from './IconComponents';
 
 const Footer: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRef.current) return;
+    
+    setError('');
+    setLoading(true);
+
+    window.emailjs.sendForm("service_0zux2j8", "template_ut2i5nk", formRef.current)
+      .then(
+        () => {
+          setSuccess(true);
+          setLoading(false);
+          if (formRef.current) formRef.current.reset();
+          // Reset success message after 5 seconds
+          setTimeout(() => setSuccess(false), 5000);
+        },
+        (err: any) => {
+          setError('Failed to send. Please try again.');
+          setLoading(false);
+          console.error('EmailJS Error:', err);
+        }
+      );
+  };
+
   return (
     <footer className="bg-brand-secondary text-brand-light">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -42,36 +71,64 @@ const Footer: React.FC = () => {
             {/* Contact Form */}
             <p className="text-sm font-semibold text-gray-300 mb-3">Contact Us</p>
             <p className="text-sm text-gray-400 mb-4">
-              Send us a message and we'll get back to you soon.
+              Send us your email and we'll get back to you soon.
             </p>
-            <form 
-              className="space-y-3" 
-              onSubmit={(e) => { 
-                e.preventDefault(); 
-                const email = (e.target as any).email.value;
-                window.location.href = `/contact?inquiry=${encodeURIComponent(email)}`; 
-              }}
-            >
-              <input
-                type="email"
-                name="email"
-                placeholder="Your email address"
-                required
-                className="w-full px-4 py-2.5 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm"
-              />
-              <button
-                type="submit"
-                className="w-full bg-brand-primary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-brand-primary/90 transition-colors text-sm"
-              >
-                Contact Us
-              </button>
-              <p className="text-xs text-gray-500 text-center">
-                Or{' '}
-                <Link href="/contact" className="text-brand-accent hover:underline">
-                  visit our contact page
-                </Link>
-              </p>
-            </form>
+
+            {success ? (
+              <div className="bg-green-600 text-white p-4 rounded-lg text-center mb-4">
+                <p className="font-semibold">Message sent successfully!</p>
+                <p className="text-sm">We'll get back to you soon.</p>
+              </div>
+            ) : (
+              <form ref={formRef} onSubmit={handleSubmit} className="space-y-3">
+                {/* <input
+                  type="text"
+                  name="full-name"
+                  placeholder="Your name"
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm"
+                /> */}
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Your email address"
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm"
+                />
+                {/* <textarea
+                  name="message"
+                  placeholder="Your message"
+                  rows={3}
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent text-sm resize-none"
+                /> */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-brand-primary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-brand-primary/90 transition-colors text-sm disabled:bg-gray-600 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </span>
+                  ) : (
+                    'Send Message'
+                  )}
+                </button>
+                {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+              </form>
+            )}
+
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Or{' '}
+              <Link href="/contact" className="text-brand-accent hover:underline">
+                visit our contact page
+              </Link>
+            </p>
           </div>
 
           {/* Column 3: Find Us - Map with Location */}
